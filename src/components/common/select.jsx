@@ -1,13 +1,15 @@
 import React from "react";
 
-const Input = ({ name, label, error, ...rest }) => {
+const Select = ({ name, label, error, children, ...rest }) => {
   return (
     <div className="form-group">
       <label htmlFor={name}>{label}</label>
-      <input {...rest} name={name} id={name} className="form-control" />
+      <select {...rest} name={name} id={name} className="form-control">
+        {children}
+      </select>
       {error && <div className="alert alert-danger">{error}</div>}
     </div>
   );
 };
 
-export default Input;
+export default Select;

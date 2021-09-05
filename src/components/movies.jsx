@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import Search from "./common/search";
 import MoviesTable from "./moviesTable";
 import ListGroup from "./common/listGroup";
 import Pagination from "./common/pagination";
@@ -49,8 +50,12 @@ class Movies extends Component {
     this.setState({ selectedGenre: genre, searchQuery: "", currentPage: 1 });
   };
 
-  handleSearch = (query) => {
-    this.setState({ searchQuery: query, selectedGenre: null, currentPage: 1 });
+  handleSearch = ({ currentTarget: input }) => {
+    this.setState({
+      searchQuery: input.value,
+      selectedGenre: null,
+      currentPage: 1,
+    });
   };
 
   handleSort = (sortColumn) => {
@@ -84,7 +89,7 @@ class Movies extends Component {
 
   render() {
     const { length: count } = this.state.movies;
-    const { pageSize, currentPage, sortColumn } = this.state;
+    const { pageSize, currentPage, sortColumn, searchQuery } = this.state;
 
     if (count === 0) return <p>There are no movies in the database.</p>;
 
@@ -108,6 +113,7 @@ class Movies extends Component {
             New Movie
           </Link>
           <p>Showing {totalCount} movies in the database.</p>
+          <Search value={searchQuery} onChange={this.handleSearch} />
           <MoviesTable
             movies={movies}
             sortColumn={sortColumn}
