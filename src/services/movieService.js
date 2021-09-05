@@ -1,97 +1,58 @@
-import * as genresAPI from "./fakeGenreService";
+import { getGenres } from "./genreService";
+import config from "../config.json";
+import http from "./httpService";
 
-const movies = [
-  {
-    _id: "5b21ca3eeb7f6fbccd471815",
-    title: "Terminator",
-    genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-    numberInStock: 6,
-    dailyRentalRate: 2.5,
-    publishDate: "2018-01-03T19:04:28.809Z",
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd471816",
-    title: "Die Hard",
-    genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-    numberInStock: 5,
-    dailyRentalRate: 2.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd471817",
-    title: "Get Out",
-    genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-    numberInStock: 8,
-    dailyRentalRate: 3.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd471819",
-    title: "Trip to Italy",
-    genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-    numberInStock: 7,
-    dailyRentalRate: 3.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd47181a",
-    title: "Airplane",
-    genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-    numberInStock: 7,
-    dailyRentalRate: 3.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd47181b",
-    title: "Wedding Crashers",
-    genre: { _id: "5b21ca3eeb7f6fbccd471814", name: "Comedy" },
-    numberInStock: 7,
-    dailyRentalRate: 3.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd47181e",
-    title: "Gone Girl",
-    genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-    numberInStock: 7,
-    dailyRentalRate: 4.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd47181f",
-    title: "The Sixth Sense",
-    genre: { _id: "5b21ca3eeb7f6fbccd471820", name: "Thriller" },
-    numberInStock: 4,
-    dailyRentalRate: 3.5,
-  },
-  {
-    _id: "5b21ca3eeb7f6fbccd471821",
-    title: "The Avengers",
-    genre: { _id: "5b21ca3eeb7f6fbccd471818", name: "Action" },
-    numberInStock: 7,
-    dailyRentalRate: 3.5,
-  },
-];
-
-export function getMovies() {
-  return movies;
+function movieUrl(movie, id) {
+  return `${config.apiBase}/movies/${(movie && movie._id) || id}`;
 }
 
-export function getMovie(id) {
-  return movies.find((m) => m._id === id);
+export async function getMovies() {
+  const { data } = await http.get(`${config.apiBase}/movies`);
+  return data;
 }
 
-export function saveMovie(movie) {
-  let movieInDb = movies.find((m) => m._id === movie._id) || {};
-  movieInDb.title = movie.title;
-  movieInDb.genre = genresAPI.getGenres().find((g) => g._id === movie.genreId);
-  movieInDb.numberInStock = movie.numberInStock;
-  movieInDb.dailyRentalRate = movie.dailyRentalRate;
+export async function getMovie(id) {
+  console.log(movieUrl(null, id), "my url");
+  const { data } = await http.get(movieUrl(null, id));
+  return data;
+}
 
-  if (!movieInDb._id) {
-    movieInDb._id = Date.now().toString();
-    movies.push(movieInDb);
+export async function saveMovie(movie) {
+  const genres = await getGenres();
+  console.log(!!movie._id);
+  if (movie._id) {
+    const body = {
+      ...movie,
+      genreId: genres.find((g) => g.name === movie.genre)._id,
+    };
+    delete body._id;
+    delete body.genre;
+    console.log(body, movie._id);
+    try {
+      const response = await http.put(movieUrl(movie), body);
+      console.log(response, "dddddddddddd");
+      return response;
+    } catch (ex) {
+      console.log(ex);
+    }
+  } else {
+    try {
+      const body = {
+        ...movie,
+        genreId: genres.find((g) => g.name === movie.genre)._id,
+      };
+      delete body.genre;
+      console.log(body, "no id");
+      const response = await http.post(`${config.apiBase}/movies`, body);
+      console.log(response, "dddddddddddd");
+      return response;
+    } catch (ex) {
+      console.log(ex);
+    }
   }
-
-  return movieInDb;
 }
 
-export function deleteMovie(id) {
-  let movieInDb = movies.find((m) => m._id === id);
-  movies.splice(movies.indexOf(movieInDb), 1);
-  return movieInDb;
+export async function deleteMovie(id) {
+  await http.delete(`${config.apiBase}/movies/${id}`);
+  return;
 }

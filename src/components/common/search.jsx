@@ -2,13 +2,13 @@ import React from "react";
 
 const Search = ({ value, onChange }) => {
   return (
-    <div class="form-outline">
+    <div className="form-outline">
       <input
         type="search"
         id="form1"
         value={value}
         onChange={onChange}
-        class="form-control"
+        className="form-control"
         placeholder="Search by title"
         aria-label="Search"
       />

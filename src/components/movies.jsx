@@ -4,8 +4,8 @@ import Search from "./common/search";
 import MoviesTable from "./moviesTable";
 import ListGroup from "./common/listGroup";
 import Pagination from "./common/pagination";
-import { getMovies } from "../services/fakeMovieService";
-import { getGenres } from "../services/fakeGenreService";
+import { getMovies, deleteMovie } from "../services/movieService";
+import { getGenres } from "../services/genreService";
 import { paginate } from "../utils/paginate";
 import _ from "lodash";
 
@@ -21,10 +21,10 @@ class Movies extends Component {
   };
 
   async componentDidMount() {
-    const data = getGenres();
+    const data = await getGenres();
     const genres = [{ _id: "", name: "All Genres" }, ...data];
 
-    const movies = getMovies();
+    const movies = await getMovies();
     this.setState({ movies, genres });
   }
 
@@ -32,6 +32,7 @@ class Movies extends Component {
     const originalMovies = this.state.movies;
     const movies = originalMovies.filter((m) => m._id !== movie._id);
     this.setState({ movies });
+    await deleteMovie(movie._id);
   };
 
   handleLike = (movie) => {
